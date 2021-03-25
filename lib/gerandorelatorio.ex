@@ -45,6 +45,12 @@ defmodule GeradorRelatorio do
     |> Enum.reduce(relatorio_list(), fn line, report -> sum_horas(line, report) end)
   end
 
+  def build_for_many(file_names) do
+    file_names
+    |> Task.async_stream(fn file_name -> build(file_name) end)
+    |> Enum.reduce(relatorio_list(), fn {:ok, result}, report -> sum_for_many(report, result) end)
+  end
+
   defp sum_horas(
          [id, hora, _dia, mes, ano],
          %{
@@ -63,7 +69,38 @@ defmodule GeradorRelatorio do
     |> Map.put("horas_anos", horas_anos)
   end
 
-  def relatorio_list() do
+  defp sum_for_many(
+         %{
+           "horas_totais" => horas_totais,
+           "horas_meses" => horas_meses,
+           "horas_anos" => horas_anos
+         },
+         %{
+           "horas_totais" => horas_totais2,
+           "horas_meses" => horas_mese2,
+           "horas_anos" => horas_anos2
+         }
+       ) do
+    horas_totais = merge_map(horas_totais, horas_totais2)
+    horas_meses = merge_map_in_map(horas_meses, horas_mese2)
+    horas_anos = merge_map_in_map(horas_anos, horas_anos2)
+
+    estruturas(horas_totais, horas_meses, horas_anos)
+  end
+
+  defp merge_map(map1, map2) do
+    Map.merge(map1, map2, fn _k, v, v2 -> v + v2 end)
+  end
+
+  defp merge_map_in_map(map1, map2) do
+    Map.merge(map1, map2, fn _k, v, v2 -> merge(v, v2) end)
+  end
+
+  defp merge(map1, map2) do
+    Map.merge(map1, map2, fn _key, v, v2 -> v + v2 end)
+  end
+
+  defp relatorio_list() do
     horas_totais = @clientes
     horas_meses = estrutura_meses()
     horas_anos = estrutura_anos()
