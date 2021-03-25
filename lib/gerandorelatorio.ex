@@ -53,10 +53,9 @@ defmodule GeradorRelatorio do
            "horas_anos" => horas_anos
          } = report
        ) do
-    IO.inspect(horas_anos[[id][ano]])
     horas_totais = Map.put(horas_totais, id, horas_totais[id] + hora)
-    # horas_meses = Map.put(horas_meses[id], mes, horas_anos[id][mes] + hora)
-    horas_anos = Map.put(horas_anos[[id][ano]], ano, horas_anos[[id][ano]] + hora)
+    horas_meses = put_in(horas_meses[id][mes], horas_anos[id][mes] + hora)
+    horas_anos = put_in(horas_anos[id][ano], horas_anos[id][ano] + hora)
 
     report
     |> Map.put("horas_totais", horas_totais)
@@ -73,11 +72,11 @@ defmodule GeradorRelatorio do
   end
 
   defp estrutura_meses() do
-    Enum.map(@clientes, fn {name, _value} -> %{name => @meses} end)
+    Enum.reduce(@clientes, %{}, fn {name, _value}, acc -> Map.put(acc, name, @meses) end)
   end
 
   defp estrutura_anos() do
-    Enum.map(@clientes, fn {name, _value} -> %{name => @anos} end)
+    Enum.reduce(@clientes, %{}, fn {name, _value}, acc -> Map.put(acc, name, @anos) end)
   end
 
   defp estruturas(horas_totais, horas_meses, horas_anos) do

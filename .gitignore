@@ -25,3 +25,4 @@ gerandorelatorio-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+lib/gerandorelatorio.ex
