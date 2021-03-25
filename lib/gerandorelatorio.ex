@@ -54,7 +54,7 @@ defmodule GeradorRelatorio do
          } = report
        ) do
     horas_totais = Map.put(horas_totais, id, horas_totais[id] + hora)
-    horas_meses = put_in(horas_meses[id][mes], horas_anos[id][mes] + hora)
+    horas_meses = put_in(horas_meses[id][mes], horas_meses[id][mes] + hora)
     horas_anos = put_in(horas_anos[id][ano], horas_anos[id][ano] + hora)
 
     report
